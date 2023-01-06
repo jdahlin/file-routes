@@ -10,7 +10,6 @@ This project has been inspired by the next.js routing.
 # FIXME: check test coverage
 # FIXME: document
 # FIXME: use pathlib internally?
-# FIXME: mypy --strict/black/isort/etc
 
 # Future
 # TODO for non-mvp:
