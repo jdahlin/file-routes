@@ -22,7 +22,6 @@ def {view_name}(request: HttpRequest, {params}) -> HttpResponse:
         "path": request.path, 
         "params": {response_params}
     }})
-
 """
 
 
