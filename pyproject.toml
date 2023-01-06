@@ -1,0 +1,12 @@
+[tool.pytest.ini_options]
+addopts =[
+    "--no-migrations",
+    "--show-capture=stdout",
+    "--tb=short",
+    "-W error::Warning",
+    "-vv"
+]
+filterwarnings = []
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+DJANGO_SETTINGS_MODULE = "djangonext.settings"
+testpaths = "user"
