@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 from django.test import Client
-from django.urls import path, URLResolver
+from django.urls import URLResolver, path
 
 from .routes import autodiscover_directory, filename_or_directory_expand_converters
 

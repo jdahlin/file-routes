@@ -10,7 +10,7 @@ from typing import Any, NamedTuple, Sequence
 
 from django.apps import apps
 from django.core import checks
-from django.urls import include, path, URLResolver, URLPattern
+from django.urls import URLPattern, URLResolver, include, path
 from django.views import View
 
 RE_CONVERTERS = re.compile(r"\[((?P<converter>[^ ]+) |)(?P<name>[^]]+)]")
@@ -44,9 +44,7 @@ def underscore_to_camel_case(word: str) -> str:
     return "".join(c.capitalize() or "_" for c in word.split("_"))
 
 
-def find_view(
-    module: ModuleType, default_view_name: str | None
-) -> Any:
+def find_view(module: ModuleType, default_view_name: str | None) -> Any:
     # for a given module, figure out the view
     # 1. function "module_name"
     # 2. function "module_name_view"
