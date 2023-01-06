@@ -1,2 +1,3 @@
+# unused, use pytest.mark.urls and urlpattern globals instead, see test_routes.py
+ROOT_URLCONF = "dummy"
 USE_TZ = True
-ROOT_URLCONF = "django_fs_routes.test.test_routes"
