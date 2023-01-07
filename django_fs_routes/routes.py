@@ -1,26 +1,54 @@
+import dataclasses
 import importlib
 import importlib.util
-import inspect
 import os
 import re
 import sys
 from collections.abc import Iterator
 from types import ModuleType
-from typing import Any, NamedTuple, Sequence
 
-from django.apps import apps
-from django.core import checks
-from django.urls import URLPattern, URLResolver, include, path
-from django.views import View
+from django_fs_routes.inspection import (
+    CheckWarning,
+    InspectedModuleInfo,
+    inspect_module,
+)
 
 RE_CONVERTERS = re.compile(r"\[((?P<converter>[^ ]+) |)(?P<name>[^]]+)]")
-PathType = tuple[Sequence[URLResolver | URLPattern], str | None, str | None]
+# https://stackoverflow.com/q/1976007
+FORBIDDEN_FILENAME_CHARS = {
+    "<",  # less than
+    ">",  # greater than
+    ":",  # colon - sometimes works, but is actually NTFS Alternate Data Streams
+    '"',  # double quote
+    "/",  # forward slash
+    "\\",  # backslash
+    "|",  # vertical bar or pipe
+    "?",  # question mark
+    "*",  # asterisk
+}
 
 
-class ViewRoute(NamedTuple):
+@dataclasses.dataclass
+class ViewRoute:
     name: str
     filename: str
     is_wildcard: bool
+    module: ModuleType = dataclasses.field(init=False)
+    inspected_module: InspectedModuleInfo = dataclasses.field(init=False)
+
+    def __post_init__(self) -> None:
+        self.module = import_filename_and_guess_module_from_path(self.filename)
+        self.inspected_module = inspect_module(self.module)
+
+    def get_default_view_name(self) -> str | None:
+        default_view_name = None
+        base_name = os.path.basename(self.filename)[:-3]
+        if self.name == "" or base_name == "index":
+            default_view_name = "index"
+        # If the view module is not a wildcard, we can provide a default view name
+        elif not self.is_wildcard:
+            default_view_name = base_name.replace("-", "_")
+        return default_view_name
 
 
 def filename_to_module_path(filename: str) -> str:
@@ -42,89 +70,6 @@ def import_filename_and_guess_module_from_path(filename: str) -> ModuleType:
 def underscore_to_camel_case(word: str) -> str:
     # foo_bar_baz -> FooBarBaz
     return "".join(c.capitalize() or "_" for c in word.split("_"))
-
-
-def find_view(module: ModuleType, default_view_name: str | None) -> Any:
-    # for a given module, figure out the view
-    # 1. function "module_name"
-    # 2. function "module_name_view"
-    # 3. function "view"
-    # 4. class "ModuleNameView"
-    # 5. class "View"
-    function_suggestion = "view"
-    class_suggestion = "View"
-    class_names = [class_suggestion]
-    function_names = [function_suggestion]
-    if default_view_name is not None:
-        function_names.insert(0, default_view_name + "_view")
-        function_names.insert(1, default_view_name)
-        class_suggestion = underscore_to_camel_case(default_view_name) + "View"
-        class_names.append(class_suggestion)
-        function_suggestion = f"{default_view_name}_view or {default_view_name} or view"
-
-    for function_name in function_names:
-        view = getattr(module, function_name, None)
-        if view is None:
-            continue
-        if not inspect.isfunction(view):
-            checks.Warning(
-                f"{function_name} in {module.__name__} is not a function",
-                hint=(
-                    f"{function_name} cannot be a {type(view).__name__}, "
-                    f"change it to be a function"
-                ),
-                id="fsroutes.W001",
-            )
-            continue
-        return view
-
-    for class_name in class_names:
-        view = getattr(module, class_name, None)
-        if view is None:
-            continue
-        if view == View:
-            # FIXME: Should this be a warning?
-            continue
-        if not inspect.isclass(view):
-            checks.Warning(
-                f"{class_name} in {module.__name__} is not a class",
-                hint=(
-                    f"{class_name} cannot be a {type(view).__name__}, "
-                    f"change it to a class"
-                ),
-                id="fsroutes.W002",
-            )
-            continue
-        if not issubclass(view, View):
-            checks.Warning(
-                f"{class_name} in {module.__name__} is not a subclass "
-                f"of django.views.View",
-                hint=f"{class_name} must inherit from django.views.View.",
-                id="fsroutes.W003",
-            )
-            continue
-        return view.as_view()
-
-    checks.Warning(
-        f"Could not find a view in {module.__name__}",
-        hint=(
-            f"Create a view function called {function_suggestion} or "
-            f"a class called {class_suggestion}."
-        ),
-        id="fsroutes.W004",
-    )
-    return None
-
-
-def get_default_view_name(view_route: ViewRoute) -> str | None:
-    default_view_name = None
-    base_name = os.path.basename(view_route.filename)[:-3]
-    if view_route.name == "" or base_name == "index":
-        default_view_name = "index"
-    # If the view module is not a wildcard, we can provide a default view name
-    elif not view_route.is_wildcard:
-        default_view_name = base_name.replace("-", "_")
-    return default_view_name
 
 
 def filename_or_directory_expand_converters(
@@ -157,20 +102,6 @@ def directory_expand_converters(directory_route: str) -> str:
     return directory_route
 
 
-# https://stackoverflow.com/q/1976007
-FORBIDDEN_FILENAME_CHARS = {
-    "<",  # less than
-    ">",  # greater than
-    ":",  # colon - sometimes works, but is actually NTFS Alternate Data Streams
-    '"',  # double quote
-    "/",  # forward slash
-    "\\",  # backslash
-    "|",  # vertical bar or pipe
-    "?",  # question mark
-    "*",  # asterisk
-}
-
-
 def directory_discover_view_routes(
     directory: str, directory_route: str, filenames: list[str]
 ) -> Iterator[ViewRoute]:
@@ -180,10 +111,10 @@ def directory_discover_view_routes(
         module_name = filename[:-3]
         bad_chars = set(module_name) - FORBIDDEN_FILENAME_CHARS
         if bad_chars:
-            checks.Warning(
+            CheckWarning(
                 f"{filename} contains invalid characters: {bad_chars}",
                 hint="Some characters are not allowed on all supported platforms.",
-                id="fsroutes.W005",
+                code="fsroutes.W005",
             )
 
         if module_name == "__init__":
@@ -220,51 +151,3 @@ def find_view_routes(root: str) -> Iterator[ViewRoute]:
         yield from directory_discover_view_routes(
             directory=directory, directory_route=route, filenames=filenames
         )
-
-
-def create_path_from_module(route: str, module: ModuleType, view: Any) -> Any:
-    route_kwargs = getattr(module, "route_kwargs", {})
-    if not isinstance(route_kwargs, dict):
-        checks.Warning(
-            f"{module.__name__}.route_kwargs must be a dict, "
-            f"not {type(route_kwargs).__name__}",
-            hint="Change route_kwargs to be a dict subclass.",
-            id="fsroutes.W006",
-        )
-        route_kwargs = {}
-
-    route_name = getattr(module, "route_name", None)
-    if route_name and not isinstance(route_name, str):
-        checks.Warning(
-            f"{module.__name__}.route_name must be a str, "
-            f"not {type(route_name).__name__}",
-            hint="Change route_name to be a string.",
-            id="fsroutes.W007",
-        )
-        route_name = None
-
-    return path(route, view, route_kwargs, name=route_name)
-
-
-def autodiscover_directory(directory: str) -> PathType:
-    routes = []
-    for view_route in find_view_routes(directory):
-        module = import_filename_and_guess_module_from_path(view_route.filename)
-        view = find_view(module, default_view_name=get_default_view_name(view_route))
-        if view is None:
-            # A warning has already been emitted inside find_view()
-            continue
-        route_path = create_path_from_module(
-            route=view_route.name,
-            view=view,
-            module=module,
-        )
-        routes.append(route_path)
-
-    return include(routes)
-
-
-def autodiscover_app_views(app_name: str, views_directory: str = "views") -> PathType:
-    app = apps.get_app_config(app_name)
-    assert app.module is not None
-    return autodiscover_directory(f"{app.module.__name__}/{views_directory}")

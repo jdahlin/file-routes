@@ -6,10 +6,8 @@ import pytest
 from django.test import Client
 from django.urls import URLResolver, path
 
-from django_fs_routes.routes import (
-    autodiscover_directory,
-    filename_or_directory_expand_converters,
-)
+from django_fs_routes.frameworks.django import autodiscover_directory
+from django_fs_routes.routes import filename_or_directory_expand_converters
 
 ParameterName = str
 ParameterType = str  # int/path/slug/uuid

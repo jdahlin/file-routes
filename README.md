@@ -68,12 +68,13 @@ only duplicate it once (filename and view name):
 In urls.py:
 
 ```python
-from django_fs_routes.routes import autodiscover_app_views
+
+from django_fs_routes.frameworks.django import autodiscover_app_views
 
 urlpatterns = [
-    ...
-    path("", autodiscover_app_views(app_name="..."))
-    ...
+ ...
+ path("", autodiscover_app_views(app_name="..."))
+ ...
 ]
 
 
@@ -151,9 +152,11 @@ version and announcing
 - [ ] unit tests: class based views
 - [ ] document
 - [ ] use pathlib internally?
-- [ ] INSTALLED_APP that automatically create the views directory
 - [ ] Implement DJANGO_FS_ROUTER_DIRECTORY
-- [ ] Pretty root page with HTML Docs?
+- [ ] Serve pretty root page with HTML docs?
+- [ ] Move to `src/` directory
+- [ ] Error multiple views with the same name: foo.py/foo
+- [ ] common decorators (csrf_enforce etc) for all views 
 
 ### Future
 
