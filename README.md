@@ -1,18 +1,18 @@
-## django-fs-routes
-File system based routing for Django
+## fs-routes
+File system based routing for Python Web Frameworks, currently supporting Django
 
 This project has been inspired by the next.js routing.
 
 ### Rationale
 
 The purpose of this project is to investigate if there's a way to make it 
-easier to add and write new viws.
+easier to add and write new views
 
 For large projects it's a good practice to write one view per file, to
 avoid making it hard to find a specific view. If you follow that
 you will have to duplicate the name of the view many times:
 
-Example:
+Django Example:
 
 In `authenticate.py`:
 
@@ -62,7 +62,7 @@ With some work, you could also write a helper, so you only duplicate one time in
 
 ### Introduction
 
-With django_fs_routes you can avoid the duplication if you want, or at your preference
+With fs-routes you can avoid the duplication if you want, or at your preference
 only duplicate it once (filename and view name):
 
 In urls.py:
@@ -80,7 +80,7 @@ urlpatterns = [
 
 ```
 
-By default django_rs_routes uses the `views` directory which will be automatically created if it does not exist.
+By default fs-routes uses the `views` directory which will be automatically created if it does not exist.
 
 Add this content to, views/authenticate.py:
 
@@ -111,7 +111,7 @@ Video script
 
 ### Tutorial
 
-### Supported Python and Django versions
+### Supported Python and Web framework versions
 
 Currently only Django 4.1 and Python 3.11 has been tested, but it is 
 likely to work in older versions as well, with perhaps minimal tweaks.
