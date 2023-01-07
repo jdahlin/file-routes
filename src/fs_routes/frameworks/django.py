@@ -5,8 +5,8 @@ from django.apps import apps
 from django.urls import URLPattern, URLResolver, include, path
 from django.views import View
 
-from django_fs_routes.inspection import CheckWarning
-from django_fs_routes.routes import (
+from fs_routes.inspection import CheckWarning
+from fs_routes.routes import (
     ViewRoute,
     find_view_routes,
     underscore_to_camel_case,

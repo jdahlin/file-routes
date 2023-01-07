@@ -7,7 +7,7 @@ import sys
 from collections.abc import Iterator
 from types import ModuleType
 
-from django_fs_routes.inspection import (
+from fs_routes.inspection import (
     CheckWarning,
     InspectedModuleInfo,
     inspect_module,

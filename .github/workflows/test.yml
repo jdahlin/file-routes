@@ -33,13 +33,13 @@ jobs:
         run: pip install -e .[all,dev,doc,test]
       - name: Lint
         run: |
-          mypy django_fs_routes
-          ruff django_fs_routes
-          black django_fs_routes --check
-          isort django_fs_routes --check-only
+          mypy src
+          ruff src
+          black src --check
+          isort src --check-only
       - run: mkdir coverage
       - name: Test
-        run: coverage run -m pytest django_fs_routes
+        run: coverage run -m pytest src
         env:
           COVERAGE_FILE: coverage/.coverage.${{ runner.os }}-py${{ matrix.python-version }}
           CONTEXT: ${{ runner.os }}-py${{ matrix.python-version }}
