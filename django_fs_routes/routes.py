@@ -73,7 +73,7 @@ def find_view(module: ModuleType, default_view_name: str | None) -> Any:
                     f"{function_name} cannot be a {type(view).__name__}, "
                     f"change it to be a function"
                 ),
-                id="viewfinder.W001",
+                id="fsroutes.W001",
             )
             continue
         return view
@@ -92,7 +92,7 @@ def find_view(module: ModuleType, default_view_name: str | None) -> Any:
                     f"{class_name} cannot be a {type(view).__name__}, "
                     f"change it to a class"
                 ),
-                id="viewfinder.W002",
+                id="fsroutes.W002",
             )
             continue
         if not issubclass(view, View):
@@ -100,7 +100,7 @@ def find_view(module: ModuleType, default_view_name: str | None) -> Any:
                 f"{class_name} in {module.__name__} is not a subclass "
                 f"of django.views.View",
                 hint=f"{class_name} must inherit from django.views.View.",
-                id="viewfinder.W003",
+                id="fsroutes.W003",
             )
             continue
         return view.as_view()
@@ -111,7 +111,7 @@ def find_view(module: ModuleType, default_view_name: str | None) -> Any:
             f"Create a view function called {function_suggestion} or "
             f"a class called {class_suggestion}."
         ),
-        id="viewfinder.W004",
+        id="fsroutes.W004",
     )
     return None
 
@@ -183,7 +183,7 @@ def directory_discover_view_routes(
             checks.Warning(
                 f"{filename} contains invalid characters: {bad_chars}",
                 hint="Some characters are not allowed on all supported platforms.",
-                id="viewfinder.W007",
+                id="fsroutes.W005",
             )
 
         if module_name == "__init__":
@@ -229,7 +229,7 @@ def create_path_from_module(route: str, module: ModuleType, view: Any) -> Any:
             f"{module.__name__}.route_kwargs must be a dict, "
             f"not {type(route_kwargs).__name__}",
             hint="Change route_kwargs to be a dict subclass.",
-            id="viewfinder.W006",
+            id="fsroutes.W006",
         )
         route_kwargs = {}
 
@@ -239,7 +239,7 @@ def create_path_from_module(route: str, module: ModuleType, view: Any) -> Any:
             f"{module.__name__}.route_name must be a str, "
             f"not {type(route_name).__name__}",
             hint="Change route_name to be a string.",
-            id="viewfinder.W007",
+            id="fsroutes.W007",
         )
         route_name = None
 
