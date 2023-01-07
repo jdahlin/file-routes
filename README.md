@@ -147,14 +147,12 @@ DJANGO_FS_ROUTER_DIRECTORY = "fsviews"
 This is a list of tasks that should be finished before doing the first
 version and announcing
 
-- [ ] reload routes without manual restart
+- [ ] django: reload routes without manual restart
+- [ ] django: Implement DJANGO_FS_ROUTER_DIRECTORY
 - [ ] unit tests: test errors
 - [ ] unit tests: class based views
 - [ ] document
-- [ ] use pathlib internally?
-- [ ] Implement DJANGO_FS_ROUTER_DIRECTORY
 - [ ] Serve pretty root page with HTML docs?
-- [ ] Move to `src/` directory
 - [ ] Error multiple views with the same name: foo.py/foo
 - [ ] common decorators (csrf_enforce etc) for all views 
 
