@@ -1,6 +1,7 @@
 import re
 from typing import Any, Sequence, cast
 
+from django.conf import settings
 from django.urls import URLPattern, URLResolver, include, path
 from django.urls.converters import get_converters
 from django.views import View
@@ -38,7 +39,9 @@ class DjangoWebFramework(WebFramework):
         return None
 
 
-def autodiscover(directory: str) -> PathType:
+def autodiscover(directory: str | None = None) -> PathType:
+    if directory is None:
+        directory = getattr(settings, "FILE_ROUTES_DIRECTORY", "routes")
     directory_visitor = DirectoryVisitor(framework=DjangoWebFramework())
 
     routes = []

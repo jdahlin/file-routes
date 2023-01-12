@@ -87,31 +87,40 @@ for instance using multiple views per file, using `*` imports or avoding `revers
 
 ### Getting started
 
-XXX: pip install
+To use file-routes, you would currently need to use Django or Flask, support for more frameworks (e.g FastAPI) is planned.
 
-### Tutorial
+For Django:
+```
+pip install file-routes[django]
+```
 
-With file routes you can avoid the duplication if you want, or at your preference
-only duplicate it once (filename and view name):
+For Flask:
+```
+pip install file-routes[flask]
+```
+
+That's it!
+
+### Django Tutorial
 
 In urls.py:
 
 ```python
 
+from django.urls import path
+
 from file_routes.frameworks.django import autodiscover
 
 urlpatterns = [
- ...
  path("", autodiscover())
- ...
 ]
 
 
 ```
 
-By default file routes uses the `views` directory which will be automatically created if it does not exist.
+By default, autodiscover will scan for routes in the `routes` directory.
 
-Add this content to, views/authenticate.py:
+Create a new directory views in your django project and call it routes/authenticate.py:
 
 ```python
 from django.http.request import HttpRequest
@@ -119,12 +128,12 @@ from django.http.response import HttpResponse
 
 def view(request: HttpRequest) -> HttpResponse:
     ...
-    return HttpResponse(...)
+    return HttpResponse("Hello World!")
 ```
 
 And that's it, you can now access this at via the URL: `/authenticate` and also via `reverse("authenticate")`
 
-If you rename the filename to `login.py`, the url and route name will automatially update.
+If you rename the filename to `login.py`, the url and route name will automatically update.
 
 ### Quick Video
 
@@ -162,7 +171,7 @@ To silence one or several system checks use the [SILENCED_SYSTEM_CHECKS](https:/
 
 ### Settings
 
-The default directory for views is called `views`, this can be changed by adding this to your Django settings.py:
+The default directory for the routes is called `routes`, this can be changed by adding this to your Django settings.py:
 
 In settings.py:
 ```python
@@ -176,7 +185,6 @@ FILE_ROUTES_DIRECTORY = "routes"
 This is a list of tasks that should be finished before doing the first
 version and announcing
 
-- [ ] django: Implement FILE_ROUTES_DIRECTORY
 - [ ] unit tests: test errors
 - [ ] document
 - [ ] Error multiple views with the same name: foo.py/foo
