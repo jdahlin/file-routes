@@ -31,12 +31,12 @@ For instance:
 
 For wildcards there are some differences between frameworks, but the general idea is:
 
-| URL path                         | Filename                            |
-|----------------------------------|-------------------------------------|
-| `/&lt;str:name&gt;`              | `routes/[str_name].py`              |
-| `/&lt;uuid:user_id&gt;/settings` | `routes/[uuid_user_id]/settings.py` |
-| `/users/`                        | `routes/user/index.py`              |
-| `/users/settings`                | `routes/user/settings.py`           |
+| URL path                   | Filename                            |
+|----------------------------|-------------------------------------|
+| `/<str:name>`              | `routes/[str_name].py`              |
+| `/<uuid:user_id>/settings` | `routes/[uuid_user_id]/settings.py` |
+| `/users/`                  | `routes/user/index.py`              |
+| `/users/settings`          | `routes/user/settings.py`           |
 
 
 For large projects it's a good practice to write one view per file, to
