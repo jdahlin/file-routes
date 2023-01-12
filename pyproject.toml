@@ -32,6 +32,7 @@ classifiers = [
 ]
 dependencies = []
 dynamic = ["version"]
+urls = { repository = "https://github.com/jdahlin/file-routes" }
 
 [project.optional-dependencies]
 dev = [
