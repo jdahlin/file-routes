@@ -5,7 +5,7 @@ on:
     types: [published]
 
 jobs:
-  build_wheel:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -17,20 +17,20 @@ jobs:
         run: |
           python -m pip install --user --upgrade hatchling
           hatchling build
-      - name: Upload wheels
-        uses: actions/upload-artifact@v2
-        with:
-          name: wheels
-          path: dist
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    if: "startsWith(github.ref, 'refs/tags/')"
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: wheels
-      - uses: actions/setup-python@v4
+#      - name: Upload wheels
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: wheels
+#          path: dist
+#  release:
+#    name: Release
+#    runs-on: ubuntu-latest
+#    if: "startsWith(github.ref, 'refs/tags/')"
+#    steps:
+#      - uses: actions/download-artifact@v2
+#        with:
+#          name: wheels
+#      - uses: actions/setup-python@v4
       - name: Publish to PyPi
         env:
           TWINE_USERNAME: __token__
