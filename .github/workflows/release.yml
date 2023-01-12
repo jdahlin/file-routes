@@ -1,0 +1,24 @@
+name: "[file-routes] Release"
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build_wheel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Build wheel and install
+        run: |
+          python -m pip install --user --upgrade hatchling
+          hatchling build
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: dist
