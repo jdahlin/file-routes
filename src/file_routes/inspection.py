@@ -4,9 +4,20 @@ import importlib.util
 import inspect
 import sys
 from types import FunctionType, ModuleType
-from typing import Any, TypeVar
+from typing import Any, Protocol, TypeVar, cast, overload
 
-T = TypeVar("T")
+
+class DjangoView(Protocol):
+    def as_view(self) -> Any:
+        ...
+
+
+class FlaskView(Protocol):
+    def as_view(self, name: str) -> Any:
+        ...
+
+
+T = TypeVar("T", str, DjangoView, FlaskView)
 
 
 @dataclasses.dataclass
@@ -49,9 +60,9 @@ class InspectedModuleInfo:
 
     def find_class_by_name(
         self, candidates: list[str], issubclass_of: type[T] | None = None
-    ) -> type[T] | None:
+    ) -> T | None:
         for candidate in candidates:
-            class_ = self.attributes.get(candidate)
+            class_ = cast(T | None, self.attributes.get(candidate))
             if class_ is None:
                 continue
             # FIXME: Should this be a warning?
@@ -76,8 +87,21 @@ class InspectedModuleInfo:
                         code="fileroutes.W003",
                     )
                     continue
+
             return class_
         return None
+
+    @overload
+    def get_attribute_by_type(
+        self, attribute: str, attribute_type: type[T], default: T
+    ) -> T:
+        ...
+
+    @overload
+    def get_attribute_by_type(
+        self, attribute: str, attribute_type: type[T], default: None
+    ) -> T | None:
+        ...
 
     def get_attribute_by_type(
         self, attribute: str, attribute_type: type[T], default: T | None = None

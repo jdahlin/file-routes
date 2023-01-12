@@ -19,7 +19,7 @@ class DjangoWebFramework(WebFramework):
         # [slug] -> <slug:slug>
         # [slug_customer] -> <slug:customer>
         _, converter, name = match.groups()
-        if converter is None:  # in _ALL_CONVERTERS:
+        if converter is None:
             if name in _ALL_CONVERTERS:
                 converter = name
             else:

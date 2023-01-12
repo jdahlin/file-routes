@@ -29,7 +29,7 @@ class FlaskWebFramework(WebFramework):
             route_name = inspected_module.get_attribute_by_type(
                 "route_name", str, default=file_route.name
             )
-            return class_view.as_view(str(route_name))
+            return class_view.as_view(route_name)
         return None
 
 

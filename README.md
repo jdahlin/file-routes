@@ -3,7 +3,7 @@ File system based routing for Python Web Frameworks, currently supporting Django
 
 This project has been inspired by the next.js routing.
 
-### Rationale
+### Background
 
 The purpose of this project is to investigate if there's a way to make it
 easier to add and write new views.
@@ -39,21 +39,20 @@ For wildcards there are some differences between frameworks, but the general ide
 | `/users/settings`                | `routes/user/settings.py`           |
 
 
-
 For large projects it's a good practice to write one view per file, to
 avoid making it hard to find a specific view. If you follow that
 you will have to duplicate the name of the view many times:
 
-Django Example:
+For example, in Django you would do something like this:
 
-In `authenticate.py`:
+In `views/authenticate.py`:
 
 ```python
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
 
 
-def authentication(request: HttpRequest) -> HttpResponse:
+def authenticate(request: HttpRequest) -> HttpResponse:
     ...
     return HttpResponse(...)
 ```
@@ -61,13 +60,12 @@ def authentication(request: HttpRequest) -> HttpResponse:
 In `urls.py`:
 
 ```python
-from views.authenticate import authenticate
+from django.urls import path
 
+from views.authenticate import authenticate  # noqa
 
 urlpatterns = [
-    ...
     path("authenticate", authenticate, name="authenticate")
-    ...
 ]
 ```
 
@@ -84,15 +82,14 @@ In the example above you end up duplicating the view name 7 times:
 | 7   | The route name               | `path(..., ..., name='authenticate')` |
 ---------------------------------------------------------------------------------
 
-Note: While not recommended, you *can* avoid duplicating some of them if you don't follow best practices.
+Note: While not recommended, you *can* avoid duplicating some of them if you don't follow best practices,
+for instance using multiple views per file, using `*` imports or avoding `reverse(...)`.
 
-* 1: By using multiple views per file
-* 5: By using `*` imports
-* 7: By avoiding `reverse(...)`
+### Getting started
 
-With some work, you could also write a helper, so you only duplicate one time in `urls.py`.
+XXX: pip install
 
-### Introduction
+### Tutorial
 
 With file routes you can avoid the duplication if you want, or at your preference
 only duplicate it once (filename and view name):
@@ -179,17 +176,14 @@ FILE_ROUTES_DIRECTORY = "routes"
 This is a list of tasks that should be finished before doing the first
 version and announcing
 
-- [ ] django: reload routes without manual restart
 - [ ] django: Implement FILE_ROUTES_DIRECTORY
 - [ ] unit tests: test errors
-- [ ] unit tests: class based views
 - [ ] document
-- [ ] Serve pretty root page with HTML docs?
 - [ ] Error multiple views with the same name: foo.py/foo
 - [ ] common decorators (csrf_enforce etc) for all views
 
 ### Future
 
-Investigate this after first MVP version
-
-- [ ] FIXME: lazy loading?
+- [ ] lazy loading?
+- [ ] django: reload routes without manual restart
+- [ ] Serve pretty root page with HTML docs?
