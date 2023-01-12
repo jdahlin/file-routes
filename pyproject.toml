@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "file_routes"
-description = "File system based routing for Django"
+description = "File system based routing for Django & Flask"
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
@@ -15,6 +15,7 @@ classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Environment :: Web Environment",
     "Framework :: Django",
+    "Framework :: Flask",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
