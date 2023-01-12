@@ -1,12 +1,44 @@
-## fs-routes
+## File Routes
 File system based routing for Python Web Frameworks, currently supporting Django
 
 This project has been inspired by the next.js routing.
 
 ### Rationale
 
-The purpose of this project is to investigate if there's a way to make it 
-easier to add and write new views
+The purpose of this project is to investigate if there's a way to make it
+easier to add and write new views.
+
+The path part of the URL was originally modelled after a unix path (/foo/bar/baz),
+where each component is separated by a '/' (slash). In a web framework you typically
+have one or several files that contains views. Why not combine the both?
+
+To be able to efficiently map a url path to a filename in Python, the following
+rules must be followed:
+
+1. All routes should go in one directory, by default called `routes/`.
+2. __init__.py files should be ignored in the path lookup as it
+3. If you want to map the root, create a file called `index.py`, a side-effect is
+   that it's not possible to create a route containing `index`
+
+For instance:
+
+| URL path          | Filename                  |
+|-------------------|---------------------------|
+| `/`               | `routes/index.py`         |
+| `/home`           | `routes/home.py`          |
+| `/users/`         | `routes/user/index.py`    |
+| `/users/settings` | `routes/user/settings.py` |
+
+For wildcards there are some differences between frameworks, but the general idea is:
+
+| URL path                         | Filename                            |
+|----------------------------------|-------------------------------------|
+| `/&lt;str:name&gt;`              | `routes/[str_name].py`              |
+| `/&lt;uuid:user_id&gt;/settings` | `routes/[uuid_user_id]/settings.py` |
+| `/users/`                        | `routes/user/index.py`              |
+| `/users/settings`                | `routes/user/settings.py`           |
+
+
 
 For large projects it's a good practice to write one view per file, to
 avoid making it hard to find a specific view. If you follow that
@@ -58,29 +90,29 @@ Note: While not recommended, you *can* avoid duplicating some of them if you don
 * 5: By using `*` imports
 * 7: By avoiding `reverse(...)`
 
-With some work, you could also write a helper, so you only duplicate one time in `urls.py`.  
+With some work, you could also write a helper, so you only duplicate one time in `urls.py`.
 
 ### Introduction
 
-With fs-routes you can avoid the duplication if you want, or at your preference
+With file routes you can avoid the duplication if you want, or at your preference
 only duplicate it once (filename and view name):
 
 In urls.py:
 
 ```python
 
-from django_fs_routes.frameworks.django import autodiscover_app_views
+from file_routes.frameworks.django import autodiscover
 
 urlpatterns = [
  ...
- path("", autodiscover_app_views(app_name="..."))
+ path("", autodiscover())
  ...
 ]
 
 
 ```
 
-By default fs-routes uses the `views` directory which will be automatically created if it does not exist.
+By default file routes uses the `views` directory which will be automatically created if it does not exist.
 
 Add this content to, views/authenticate.py:
 
@@ -113,21 +145,21 @@ Video script
 
 ### Supported Python and Web framework versions
 
-Currently only Django 4.1 and Python 3.11 has been tested, but it is 
+Currently only Django 4.1 and Python 3.11 has been tested, but it is
 likely to work in older versions as well, with perhaps minimal tweaks.
 
 ### System Checks Reference
 
-To aid users and make it easier to debug common issues, django-fs-routes extends the [System check framework](https://docs.djangoproject.com/en/4.1/ref/checks/) in Django
+To aid users and make it easier to debug common issues, file-routes extends the [System check framework](https://docs.djangoproject.com/en/4.1/ref/checks/) in Django
 and adds the following checks
 
-* `fsroutes.W001` view must be a function
-* `fsroutes.W002` view must be a class
-* `fsroutes.W003` view must be a subclass of django.views.View
-* `fsroutes.W004` cannot find view in module
-* `fsroutes.W005` invalid view name
-* `fsroutes.W006` route_kwargs must be a dict
-* `fsroutes.W007` route_name must be a str
+* `fileroutes.W001` view must be a function
+* `fileroutes.W002` view must be a class
+* `fileroutes.W003` view must be a subclass of django.views.View
+* `fileroutes.W004` cannot find view in module
+* `fileroutes.W005` invalid view name
+* `fileroutes.W006` route_kwargs must be a dict
+* `fileroutes.W007` route_name must be a str
 
 To silence one or several system checks use the [SILENCED_SYSTEM_CHECKS](https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-SILENCED_SYSTEM_CHECKS) setting.
 
@@ -137,7 +169,7 @@ The default directory for views is called `views`, this can be changed by adding
 
 In settings.py:
 ```python
-DJANGO_FS_ROUTER_DIRECTORY = "fsviews"
+FILE_ROUTES_DIRECTORY = "routes"
 ```
 
 ## Roadmap
@@ -148,17 +180,16 @@ This is a list of tasks that should be finished before doing the first
 version and announcing
 
 - [ ] django: reload routes without manual restart
-- [ ] django: Implement DJANGO_FS_ROUTER_DIRECTORY
+- [ ] django: Implement FILE_ROUTES_DIRECTORY
 - [ ] unit tests: test errors
 - [ ] unit tests: class based views
 - [ ] document
 - [ ] Serve pretty root page with HTML docs?
 - [ ] Error multiple views with the same name: foo.py/foo
-- [ ] common decorators (csrf_enforce etc) for all views 
+- [ ] common decorators (csrf_enforce etc) for all views
 
 ### Future
 
 Investigate this after first MVP version
 
 - [ ] FIXME: lazy loading?
-- [ ] FIXME: Flask/FastAPI support?

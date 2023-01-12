@@ -1,7 +1,12 @@
 import dataclasses
+import importlib
+import importlib.util
 import inspect
+import sys
 from types import FunctionType, ModuleType
 from typing import Any, TypeVar
+
+T = TypeVar("T")
 
 
 @dataclasses.dataclass
@@ -11,20 +16,17 @@ class CheckWarning:
     hint: str | None = None
 
 
-T = TypeVar("T")
-
-
 @dataclasses.dataclass
 class InspectedModuleInfo:
     module: ModuleType
     attributes: dict[str, Any]
-    warnings: list[CheckWarning] = dataclasses.field(init=False)
+    warnings: list[CheckWarning] = dataclasses.field(default_factory=list)
 
     @property
     def name(self) -> str:
         return self.module.__name__
 
-    def warning(self, message, code: str, hint: str | None = None):
+    def warning(self, message: str, code: str, hint: str | None = None) -> None:
         self.warnings.append(CheckWarning(message, code, hint))
 
     def find_function_by_name(self, candidates: list[str]) -> FunctionType | None:
@@ -35,7 +37,7 @@ class InspectedModuleInfo:
             if not inspect.isfunction(function):
                 self.warning(
                     f"{candidate} in {self.name} is not a function",
-                    code="fsroutes.W001",
+                    code="fileroutes.W001",
                     hint=(
                         f"{candidate} cannot be a {type(function).__name__}, "
                         f"change it to be a function"
@@ -60,7 +62,7 @@ class InspectedModuleInfo:
                         f"{candidate} cannot be a {type(class_).__name__}, "
                         f"change it to a class"
                     ),
-                    code="fsroutes.W002",
+                    code="fileroutes.W002",
                 )
                 continue
             if issubclass_of is not None:
@@ -71,11 +73,25 @@ class InspectedModuleInfo:
                         f"{candidate} in {self.name} is not a subclass "
                         f"of {issubclass_of.__name__}",
                         hint=f"{candidate} must inherit from {issubclass_of.__name__}",
-                        code="fsroutes.W003",
+                        code="fileroutes.W003",
                     )
                     continue
             return class_
         return None
+
+    def get_attribute_by_type(
+        self, attribute: str, attribute_type: type[T], default: T | None = None
+    ) -> T | None:
+        route_kwargs = getattr(self.module, attribute, default)
+        if not isinstance(route_kwargs, attribute_type):
+            CheckWarning(
+                f"{self.name}.{attribute} must be a {attribute_type}, "
+                f"not {type(route_kwargs).__name__}",
+                hint=f"Change {attribute} to be a {attribute_type}.",
+                code="fileroutes.W006",
+            )
+            route_kwargs = default
+        return route_kwargs
 
 
 def inspect_module(module: ModuleType) -> InspectedModuleInfo:
@@ -83,3 +99,19 @@ def inspect_module(module: ModuleType) -> InspectedModuleInfo:
     for name, value in inspect.getmembers(module):
         attributes[name] = value
     return InspectedModuleInfo(module=module, attributes=attributes)
+
+
+def filename_to_module_path(filename: str) -> str:
+    # foo/bar/baz.py -> foo.bar.baz
+    return filename[:-3].replace("/", ".")
+
+
+def import_filename_and_guess_module_from_path(filename: str) -> ModuleType:
+    module_name = filename_to_module_path(filename)
+    spec = importlib.util.spec_from_file_location(module_name, filename)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module

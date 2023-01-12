@@ -3,10 +3,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "fs_routes"
+name = "file_routes"
 description = "File system based routing for Django"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 license = "MIT"
 authors = [
     { name = "Johan Dahlin", email = "jdahlin@gmail.com" },
@@ -29,9 +29,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-dependencies = [
-    "django >= 4.0",
-]
+dependencies = []
 dynamic = ["version"]
 
 [project.optional-dependencies]
@@ -45,6 +43,8 @@ dev = [
     "isort >=5.0.6,<6.0.0",
     "django-stubs >= 1.13.1"
 ]
+django = ["django >= 4.0"]
+flask = ["Flask >= 2.2"]
 
 [tool.coverage.run]
 parallel = true
@@ -54,7 +54,7 @@ source = [
 context = '${CONTEXT}'
 
 [tool.hatch.version]
-path = "src/fs_routes/__init__.py"
+path = "src/file_routes/__init__.py"
 
 [tool.isort]
 profile = "black"
@@ -72,5 +72,5 @@ addopts =[
 ]
 filterwarnings = []
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
-DJANGO_SETTINGS_MODULE = "src.fs_routes.tests.django_settings"
+DJANGO_SETTINGS_MODULE = "file_routes.tests.django_settings"
 testpaths = "user"
