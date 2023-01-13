@@ -195,3 +195,11 @@ version and announcing
 - [ ] lazy loading?
 - [ ] django: reload routes without manual restart
 - [ ] Serve pretty root page with HTML docs?
+
+## How to release
+
+1. Bump version in `src/file_routes/__init__.py`
+2. Commit and Push
+3. Go to https://github.com/jdahlin/file-routes/releases/new
+4. Fill in Tag (vX.Y.Z), Title and Description
+5. Click on [Publish Release]
