@@ -40,7 +40,7 @@ dev = [
     "pytest-django == 4.5.2",
     "coverage[toml] >= 6.5.0,< 8.0",
     "mypy == 0.991",
-    "ruff == 0.0.219",
+    "ruff == 0.0.225",
     "black == 22.12.0",
     "isort >=5.0.6,<6.0.0",
     "django-stubs >= 1.13.1"
